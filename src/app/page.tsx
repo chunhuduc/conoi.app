@@ -3,7 +3,7 @@ import { landingLetters } from "@/data/letters";
 
 export default function Home() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(120%_120%_at_50%_0%,#fdf6f1_0%,#f9e8e0_55%,#f3d6c8_100%)] px-6 py-12 sm:py-20">
+    <main className="relative flex flex-col items-center justify-center bg-[radial-gradient(120%_120%_at_50%_0%,#fdf6f1_0%,#f9e8e0_55%,#f3d6c8_100%)] px-6 py-4 sm:py-20">
       {/* Vầng sáng ấm phía sau, gợi nắng sớm */}
       <div
         aria-hidden="true"
@@ -26,7 +26,7 @@ export default function Home() {
         </p>
 
         {/* Lá thư — trung tâm thị giác, lật/vuốt được */}
-        <div className="mt-6 w-full sm:mt-8">
+        <div className="mt-6 w-full overflow-hidden sm:mt-8">
           <LetterStack letters={landingLetters} />
         </div>
 
