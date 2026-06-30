@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { categoryLabel, type Letter } from "@/data/letters";
 
 type Dir = "left" | "right";
@@ -21,7 +21,6 @@ const snap = (n: number) => Math.round(n * 1000) / 1000;
 
 const VISIBLE = 3; // luôn render sẵn 3 lá
 const LEAVE_MS = 420; // thời gian lá trên cùng bay ra
-const RESIZE_MS = 360; // thời gian container co giãn theo nội dung mới
 const SWIPE_THRESHOLD = 70; // px vuốt tối thiểu để tính là "lật"
 
 interface LetterStackProps {
@@ -29,6 +28,48 @@ interface LetterStackProps {
   // Dãy chấm chỉ báo "đang xem lá thứ mấy". Pattern đẹp, để dành dùng ở chỗ
   // khác (ví dụ trang xem lại toàn bộ thư) — landing page hiện không cần.
   showIndicator?: boolean;
+}
+
+// Nội dung bên trong lá thư — dùng chung cho cả lá hiển thị lẫn lá "đo ẩn"
+// (xem useLayoutEffect bên dưới) để chiều cao đo được khớp 100% với thực tế.
+function LetterCardBody({ letter }: { letter: Letter }) {
+  return (
+    <>
+      <div className="mb-4 flex items-center justify-between border-b border-coral-900/8 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-coral-50 text-sm font-medium text-coral-600">
+            {letter.sender.charAt(0)}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-coral-900">
+              {letter.sender} gửi {letter.childName}
+            </p>
+            <p className="text-xs text-coral-800/50">{letter.childMeta}</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-center rounded-lg bg-coral-50 px-3 py-1.5 text-coral-600">
+          <span className="text-[10px] font-medium uppercase tracking-wide">
+            {letter.dayLabel}
+          </span>
+          <span className="text-base font-semibold leading-none">
+            {letter.time}
+          </span>
+        </div>
+      </div>
+
+      <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-coral-400">
+        {categoryLabel[letter.category]}
+      </p>
+
+      <p className="font-serif text-[15px] leading-loose text-coral-900/90">
+        {letter.body}
+      </p>
+
+      <p className="mt-5 font-script text-2xl leading-none text-coral-600">
+        — {letter.sender}
+      </p>
+    </>
+  );
 }
 
 export function LetterStack({
@@ -68,20 +109,34 @@ export function LetterStack({
   const [dragX, setDragX] = useState<number | null>(null); // null = không kéo
   const [hintX, setHintX] = useState(0); // dao động nhẹ khi idle để gợi ý vuốt
   const [interacted, setInteracted] = useState(false);
-  const [containerH, setContainerH] = useState<number>();
+
+  // Chiều cao khung CỐ ĐỊNH, đo MỘT LẦN trên toàn bộ nguồn thư (không phải
+  // riêng lá đang hiện) → đổi lá không bao giờ làm khung đổi kích thước/khiến
+  // trang xê dịch nữa. Mỗi lá thư hiển thị sẽ giãn đầy khung này (h-full),
+  // giống như các tờ giấy thư cùng khổ — lá ngắn hơn chỉ để trống phần dưới.
+  const measureRefs = useRef(new Map<string, HTMLDivElement>());
+  const [stackHeight, setStackHeight] = useState<number>();
+
+  useLayoutEffect(() => {
+    let max = 0;
+    letters.forEach((l) => {
+      const el = measureRefs.current.get(l.id);
+      if (el) max = Math.max(max, el.offsetHeight);
+    });
+    if (max > 0) setStackHeight(max);
+  }, [letters]);
 
   const phase = useRef<"idle" | "leaving">("idle");
   const drag = useRef({ startX: 0, x: 0, active: false, moved: false });
-  const cardEls = useRef(new Map<number, HTMLDivElement>());
   const reduceMotion = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     reduceMotion.current =
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   }, []);
 
   // Bỏ cờ `enter` ở frame kế tiếp → lá mới chuyển từ trạng thái "xuất hiện" về vị trí thật
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!cards.some((c) => c.enter)) return;
     const r = requestAnimationFrame(() =>
       setCards((cs) => cs.map((c) => (c.enter ? { ...c, enter: false } : c)))
@@ -89,15 +144,8 @@ export function LetterStack({
     return () => cancelAnimationFrame(r);
   }, [cards]);
 
-  // Căn container vừa với lá trên cùng (lá đầu tiên không-đang-bay-ra)
-  useLayoutEffect(() => {
-    const top = cards.find((c) => !c.exiting);
-    const el = top && cardEls.current.get(top.uid);
-    if (el) setContainerH(el.offsetHeight);
-  }, [cards]);
-
   // Idle hint: lá trên cùng khẽ nhích sang trái rồi về, báo có thể vuốt
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (interacted || reduceMotion.current) return;
     let alive = true;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -249,64 +297,45 @@ export function LetterStack({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onKeyDown={onKeyDown}
-        style={{
-          height: containerH,
-          transition: `height ${RESIZE_MS}ms cubic-bezier(0.4,0,0.2,1)`,
-        }}
+        style={{ height: stackHeight }}
         className="relative w-full cursor-pointer touch-pan-y select-none outline-none [perspective:1400px] focus-visible:rounded-2xl focus-visible:ring-2 focus-visible:ring-coral-400"
       >
+        {/* Khối đo ẩn: render TẤT CẢ lá trong nguồn (không chỉ 3 lá đang hiện)
+            cùng style hệt lá thật, để lấy chiều cao lớn nhất một lần duy nhất.
+            visibility:hidden giữ nguyên kích thước layout nhưng không hiện ra
+            và không nhận tương tác. */}
+        <div
+          aria-hidden="true"
+          className="invisible absolute inset-x-0 top-0 -z-10 pointer-events-none"
+        >
+          {letters.map((l) => (
+            <div
+              key={l.id}
+              ref={(el) => {
+                if (el) measureRefs.current.set(l.id, el);
+                else measureRefs.current.delete(l.id);
+              }}
+              className="rounded-2xl bg-white p-7 text-left"
+            >
+              <LetterCardBody letter={l} />
+            </div>
+          ))}
+        </div>
+
         {cards.map((card) => {
           const s = card.exiting ? -1 : slot++;
           return (
             <div
               key={card.uid}
-              ref={(el) => {
-                if (el) cardEls.current.set(card.uid, el);
-                else cardEls.current.delete(card.uid);
-              }}
               aria-hidden={s !== 0}
               style={{
                 ...styleFor(card, s),
                 transformOrigin: "center bottom",
                 willChange: "transform, opacity",
               }}
-              className="absolute inset-x-0 top-0 rounded-2xl bg-white p-7 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5"
+              className="absolute inset-x-0 top-0 h-full rounded-2xl bg-white p-7 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5"
             >
-              <div className="mb-4 flex items-center justify-between border-b border-coral-900/8 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-coral-50 text-sm font-medium text-coral-600">
-                    {card.letter.sender.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-coral-900">
-                      {card.letter.sender} gửi {card.letter.childName}
-                    </p>
-                    <p className="text-xs text-coral-800/50">
-                      {card.letter.childMeta}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center rounded-lg bg-coral-50 px-3 py-1.5 text-coral-600">
-                  <span className="text-[10px] font-medium uppercase tracking-wide">
-                    {card.letter.dayLabel}
-                  </span>
-                  <span className="text-base font-semibold leading-none">
-                    {card.letter.time}
-                  </span>
-                </div>
-              </div>
-
-              <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-coral-400">
-                {categoryLabel[card.letter.category]}
-              </p>
-
-              <p className="font-serif text-[15px] leading-loose text-coral-900/90">
-                {card.letter.body}
-              </p>
-
-              <p className="mt-5 font-script text-2xl leading-none text-coral-600">
-                — {card.letter.sender}
-              </p>
+              <LetterCardBody letter={card.letter} />
             </div>
           );
         })}
