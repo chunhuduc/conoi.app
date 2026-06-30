@@ -26,7 +26,7 @@ export default function Home() {
         </p>
 
         {/* Lá thư — trung tâm thị giác, lật/vuốt được */}
-        <div className="mt-6 w-full overflow-hidden sm:mt-8">
+        <div className="mt-6 w-full sm:mt-8">
           <LetterStack letters={landingLetters} />
         </div>
 
