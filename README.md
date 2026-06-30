@@ -2,6 +2,15 @@
 
 App gửi email hàng ngày từ cha mẹ đến con cái, nội dung cá nhân hoá theo tên, độ tuổi, sở thích của con (vẽ manga, đọc truyện, kỹ năng sống, học tập, khám phá thế giới).
 
+<!-- chunhuduc.com:showcase:start -->
+```yaml
+summary: "Personalized daily email from parent to child, tailored by name, age, and interests. Brainstorm docs plus a tested Google Apps Script proof-of-concept; Next.js + Neon + OpenAI build in progress."
+tags: [Next.js, Neon, OpenAI]
+complexityScore: 3
+motif: { from: "#f59e0b", to: "#ec4899", icon: creator }
+```
+<!-- chunhuduc.com:showcase:end -->
+
 ## Trạng thái hiện tại
 
 🟡 Giai đoạn brainstorm + proof-of-concept. Chưa có code production (Next.js) trong repo này. Repo này hiện chứa:
