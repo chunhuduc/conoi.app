@@ -34,6 +34,7 @@ Thư mục `scripts/legacy-google-apps-script/` chứa bản proof-of-concept ba
 - Nội dung email luôn bằng tiếng Việt, xưng hô cha/mẹ - con
 - Không dùng Supabase, dùng Neon
 - Tránh gửi trùng resource/link cho cùng một user, dù chủ đề (topic) được phép lặp lại
+- **UI/thiết kế: BẮT BUỘC theo `brainstorming/design-system.md`** (palette san hô/kem ấm, font serif cho "giọng nói" + sans cho UI + script cho chữ ký, tối giản, lá thư là trung tâm, animation gợi ý tương tác). Đọc file đó trước khi làm bất kỳ màn hình/feature UI mới nào.
 
 ## File brainstorming khác
 
@@ -42,3 +43,5 @@ Thư mục `scripts/legacy-google-apps-script/` chứa bản proof-of-concept ba
 - `brainstorming/branding.md` — tên thương hiệu, domain, các tên đã cân nhắc và loại bỏ
 - `brainstorming/content-tone-guide.md` — quy tắc giọng văn cho từng category nội dung
 - `brainstorming/tech-decisions.md` — các quyết định kỹ thuật và lý do
+- `brainstorming/competitor-research.md` — nghiên cứu đối thủ cạnh tranh, landing page UX patterns, phác thảo cấu trúc landing page
+- `brainstorming/design-system.md` — **guideline thiết kế UI** (màu, font, component pattern, animation, bẫy kỹ thuật); đọc trước khi làm UI mới

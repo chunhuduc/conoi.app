@@ -13,10 +13,11 @@ motif: { from: "#f59e0b", to: "#ec4899", icon: creator }
 
 ## Trạng thái hiện tại
 
-🟡 Giai đoạn brainstorm + proof-of-concept. Chưa có code production (Next.js) trong repo này. Repo này hiện chứa:
+🟡 Landing page tĩnh đầu tiên (Next.js + Tailwind) đã có trong `src/app/`. Backend (onboarding, cron gửi email, Neon) chưa làm. Repo này hiện chứa:
 
 - `CLAUDE.md` — context để Claude Code đọc khi mở project
-- `brainstorming/` — toàn bộ tài liệu định hướng sản phẩm, branding, tech decisions
+- `brainstorming/` — toàn bộ tài liệu định hướng sản phẩm, branding, tech decisions, nghiên cứu đối thủ
+- `src/app/` — landing page Next.js (App Router + Tailwind)
 - `scripts/legacy-google-apps-script/` — bản thử nghiệm đầu tiên (Google Apps Script), đã test thực tế, dùng làm tham khảo logic khi port sang Next.js
 
 ## Tech stack dự kiến

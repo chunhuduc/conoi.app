@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #2c2c2a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-be-vietnam-pro);
+  --font-serif: var(--font-noto-serif);
+  --font-script: var(--font-caveat);
+  --color-cream-50: #fdf6f1;
+  --color-cream-100: #fbeee6;
+  --color-coral-50: #faece7;
+  --color-coral-100: #f6ddd1;
+  --color-coral-200: #f0997b;
+  --color-coral-400: #d85a30;
+  --color-coral-600: #993c1d;
+  --color-coral-800: #712b13;
+  --color-coral-900: #4a1b0c;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Gợi ý thao tác: dòng chữ "Vuốt hoặc chạm..." nhấp nháy nhẹ khi chưa tương tác.
+   (Hiệu ứng "hé lật" của lá thư được điều khiển bằng JS qua state `deg`.) */
+.letter-hint-pulse {
+  animation: letter-hint-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes letter-hint-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter-card--hint,
+  .letter-hint-pulse {
+    animation: none;
+  }
+}
