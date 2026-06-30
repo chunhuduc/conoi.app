@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "mcp__04f5da11-7b70-4258-a644-c77bcb531f26__deploy_to_vercel",
+      "Bash(git push *)",
+      "Bash(vercel deploy *)",
+      "Bash(npm install *)",
+      "Bash(wait)",
+      "Bash(vercel project *)",
+      "Bash(tee vercel-deploy.log)"
+    ]
+  }
+}
