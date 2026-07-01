@@ -17,6 +17,23 @@
 | Dịch vụ gửi email | Resend vs Gmail API | Resend phổ biến với Next.js, free tier ~100 email/ngày, dễ tích hợp. Gmail API đã từng dùng ở bản test thủ công nhưng không phù hợp cho gửi tự động quy mô lớn (giới hạn quota, không thiết kế cho transactional email) |
 | Authentication | Tự build vs NextAuth/Auth.js vs Clerk | Cần cân nhắc giữa độ phức tạp setup và chi phí (Clerk có free tier nhưng giới hạn user) |
 
+## Kiến trúc admin/founder (monorepo, tách được sau)
+
+Founder cần một front-end quản lý riêng (category/topic/generation strategy, xem users/children/send logs) — không dùng chung UI với app phụ huynh vì không cần theo `design-system.md`. Quyết định: bắt đầu chung 1 repo dạng monorepo, cấu trúc packages tách rõ để sau này tách repo riêng không phải refactor logic.
+
+| Hạng mục | Lựa chọn | Lý do |
+|---|---|---|
+| Cấu trúc repo | Monorepo, npm workspaces (`apps/web`, `apps/admin`, `packages/db`, `packages/core`) | Native trong npm, không cần thêm tool (Turborepo) ở quy mô hiện tại; ranh giới package rõ giúp tách repo sau này chỉ là copy thư mục, không phải viết lại logic |
+| Deploy | 2 Vercel project riêng từ cùng 1 repo GitHub, khác Root Directory (`apps/web` vs `apps/admin`) | Domain riêng (conoi.app / admin.conoi.app), build/deploy độc lập, env var riêng ngay từ đầu dù chung repo |
+| Business logic dùng chung | `packages/core` (topic rotation, generation-strategy interface, prompt builder) — TypeScript thuần, không phụ thuộc Next.js | Cả `apps/web` (cron) và `apps/admin` (CRUD taxonomy) đều cần đọc/dùng logic taxonomy giống nhau, tránh viết trùng |
+| Data access layer | `packages/db` (Drizzle + Neon driver, schema dùng chung) | 1 nguồn schema duy nhất cho cả 2 app, tránh lệch schema |
+| Database | Vẫn 1 Neon project chung, không tách schema vật lý | Bảng đã phân theo domain rõ (taxonomy do admin ghi vs parent-facing do web ghi), chưa đủ lý do kỹ thuật để tách project/schema ở quy mô hiện tại; tách sau vẫn dễ nếu cần cách ly mạnh hơn |
+| Auth cho admin | Auth.js riêng cho `apps/admin`, allowlist email founder (khác session/cookie với `apps/web`) | Đơn giản vì hiện chỉ 1 admin (founder), mở rộng được sang nhiều admin sau bằng cách thêm bảng `admin_users`/role |
+| Backend | Không tách server riêng (Express/Nest...) — route handlers của Next.js (`apps/*/api/*`) đóng vai trò backend, gọi vào `packages/core`/`packages/db` | Đủ dùng ở quy mô hiện tại; tách backend riêng chỉ đáng làm khi chạm giới hạn cụ thể: serverless function timeout (10s free/60s pro) hoặc cần xử lý bất đồng bộ dài hơi (khả năng cao xảy ra ở giai đoạn in ấn + gửi bưu điện — gọi API in ấn, theo dõi trạng thái đơn, retry) |
+| Caching | Next.js Data Cache (`unstable_cache` + `tags`) cho taxonomy (categories/topics/generation strategies), admin gọi `revalidateTag` sau khi save; không thêm Redis/KV ở giai đoạn này | Taxonomy đọc nhiều (mỗi cron chạy cho từng con mỗi ngày) nhưng admin ghi ít — cache tầng ứng dụng tránh query Neon lặp lại và giảm ảnh hưởng cold-start của Neon serverless. Vì `apps/web` và `apps/admin` deploy riêng nên admin cần gọi 1 API route revalidate của `apps/web` sau khi lưu thay đổi taxonomy |
+
+**Ghi chú migration khi tách repo thật sự sau này**: `packages/core`/`packages/db` không phụ thuộc Next.js nên tách backend ra service riêng (nếu cần) chỉ phải viết lại phần route handler → controller (mỏng) và cơ chế trigger cron (Vercel Cron → scheduler riêng hoặc vẫn giữ Vercel Cron gọi HTTP sang service mới). Phần dễ vướng nhất là **auth** (Auth.js gắn với Next.js session/cookie) — nếu tách API khỏi Next.js mà frontend vẫn ở Next.js, cần thiết kế lại cách 2 phía chia sẻ phiên đăng nhập (JWT riêng, hoặc giữ Next.js làm BFF gọi backend mới bằng service token).
+
 ## Ý tưởng kiến trúc đã nêu trong brainstorm, chưa chốt
 
 Đã thảo luận sơ bộ khi bàn tech stack/kiến trúc, nhưng buổi brainstorm chuyển hướng sang bàn feature trước khi chốt — ghi lại để không mất ý, chưa phải quyết định:
