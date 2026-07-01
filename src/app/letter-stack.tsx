@@ -11,6 +11,7 @@ interface Card {
   tilt: number; // góc nghiêng ngẫu nhiên, gắn khi lá vào chồng, giữ tới khi bị lật đi
   enter?: boolean; // true ngay khi mới được nạp → để chạy hiệu ứng xuất hiện
   exiting?: Dir; // hướng đang bay ra
+  justPromoted?: boolean; // true đúng 1 frame khi lá bị đẩy lên slot thấp hơn do lá trên cùng bị lật đi → tắt transition để không "trượt lên", lá chỉ lộ ra đúng vị trí nó đã đứng sẵn
 }
 
 // Làm tròn 3 chữ số thập phân cho MỌI số đưa vào transform. Float dài kiểu
@@ -30,8 +31,7 @@ interface LetterStackProps {
   showIndicator?: boolean;
 }
 
-// Nội dung bên trong lá thư — dùng chung cho cả lá hiển thị lẫn lá "đo ẩn"
-// (xem useLayoutEffect bên dưới) để chiều cao đo được khớp 100% với thực tế.
+// Nội dung bên trong lá thư
 function LetterCardBody({ letter }: { letter: Letter }) {
   return (
     <>
@@ -112,21 +112,21 @@ export function LetterStack({
   const [hintX, setHintX] = useState(0); // dao động nhẹ khi idle để gợi ý vuốt
   const [interacted, setInteracted] = useState(false);
 
-  // Chiều cao khung CỐ ĐỊNH, đo MỘT LẦN trên toàn bộ nguồn thư (không phải
-  // riêng lá đang hiện) → đổi lá không bao giờ làm khung đổi kích thước/khiến
-  // trang xê dịch nữa. Mỗi lá thư hiển thị sẽ giãn đầy khung này (h-full),
-  // giống như các tờ giấy thư cùng khổ — lá ngắn hơn chỉ để trống phần dưới.
-  const measureRefs = useRef(new Map<string, HTMLDivElement>());
+  // Chiều cao khung CỐ ĐỊNH, đo MỘT LẦN duy nhất lúc mount (từ lá đầu tiên
+  // nằm trên cùng) rồi giữ nguyên suốt vòng đời component — không đo lại khi
+  // lá trên cùng đổi, nên khung chồng thư (và vị trí của nó khi container cha
+  // căn giữa màn hình) không bao giờ dịch chuyển nữa. Mỗi lá thư spawn sau này
+  // tự co giãn theo đúng nội dung của nó (không ép về khung chung); lá dài bất
+  // thường có thể tràn ra ngoài khung/viewport — chấp nhận được, miễn là không
+  // gây xê dịch cho các lá khác.
+  const topCardRef = useRef<HTMLDivElement | null>(null);
   const [stackHeight, setStackHeight] = useState<number>();
 
   useLayoutEffect(() => {
-    let max = 0;
-    letters.forEach((l) => {
-      const el = measureRefs.current.get(l.id);
-      if (el) max = Math.max(max, el.offsetHeight);
-    });
-    if (max > 0) setStackHeight(max);
-  }, [letters]);
+    const el = topCardRef.current;
+    if (el) setStackHeight(el.offsetHeight);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const phase = useRef<"idle" | "leaving">("idle");
   const drag = useRef({ startX: 0, x: 0, active: false, moved: false });
@@ -137,11 +137,20 @@ export function LetterStack({
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   }, []);
 
-  // Bỏ cờ `enter` ở frame kế tiếp → lá mới chuyển từ trạng thái "xuất hiện" về vị trí thật
+  // Bỏ cờ `enter`/`justPromoted` ở frame kế tiếp: lá mới chuyển từ trạng thái
+  // "xuất hiện" về vị trí thật (có animate), còn lá vừa bị đẩy slot do lá trên
+  // cùng bị lật đi thì chỉ cần tắt transition đúng 1 frame rồi trả lại bình
+  // thường (không có transition nào chạy vì giá trị không đổi thêm nữa).
   useLayoutEffect(() => {
-    if (!cards.some((c) => c.enter)) return;
+    if (!cards.some((c) => c.enter || c.justPromoted)) return;
     const r = requestAnimationFrame(() =>
-      setCards((cs) => cs.map((c) => (c.enter ? { ...c, enter: false } : c)))
+      setCards((cs) =>
+        cs.map((c) =>
+          c.enter || c.justPromoted
+            ? { ...c, enter: false, justPromoted: false }
+            : c
+        )
+      )
     );
     return () => cancelAnimationFrame(r);
   }, [cards]);
@@ -177,10 +186,17 @@ export function LetterStack({
     // Tạo lá mới NGAY ĐÂY (một lần) — không gọi makeCard() bên trong updater,
     // vì updater bị React StrictMode gọi 2 lần (dev) sẽ nuốt mất thư trong nguồn.
     const fresh = makeCard();
-    // Đánh dấu lá trên cùng đang bay ra + nạp ngay lá mới ở đáy chồng
+    // Đánh dấu lá trên cùng đang bay ra + nạp ngay lá mới ở đáy chồng. Các lá
+    // còn lại (đã đứng sẵn trong chồng) được đánh dấu justPromoted để tắt
+    // transition — chúng không "trượt lên" mà chỉ lộ ra đúng vị trí đã có sẵn
+    // khi lá trên cùng bay đi.
     setCards((cs) => {
       const [top, ...rest] = cs;
-      return [{ ...top, exiting: dir }, ...rest, fresh];
+      return [
+        { ...top, exiting: dir },
+        ...rest.map((c) => ({ ...c, justPromoted: true })),
+        fresh,
+      ];
     });
     setTimeout(
       () => {
@@ -271,7 +287,7 @@ export function LetterStack({
         zIndex: z,
         opacity: 1,
         transform: `translateX(${hintX}px) rotate(${card.tilt}deg)`,
-        transition: moveTransition,
+        transition: card.justPromoted ? "none" : moveTransition,
       };
     }
     // Các lá phía sau: lùi xuống + thu nhỏ để ló ra như một chồng thư
@@ -281,7 +297,7 @@ export function LetterStack({
       zIndex: z,
       opacity: card.enter ? 0 : 1,
       transform: `translateY(${ty}px) scale(${sc}) rotate(${card.tilt}deg)`,
-      transition: moveTransition,
+      transition: card.justPromoted ? "none" : moveTransition,
     };
   }
 
@@ -302,40 +318,19 @@ export function LetterStack({
         style={{ height: stackHeight }}
         className="relative w-full cursor-pointer touch-pan-y select-none outline-none [perspective:1400px] focus-visible:rounded-2xl focus-visible:ring-2 focus-visible:ring-coral-400"
       >
-        {/* Khối đo ẩn: render TẤT CẢ lá trong nguồn (không chỉ 3 lá đang hiện)
-            cùng style hệt lá thật, để lấy chiều cao lớn nhất một lần duy nhất.
-            visibility:hidden giữ nguyên kích thước layout nhưng không hiện ra
-            và không nhận tương tác. */}
-        <div
-          aria-hidden="true"
-          className="invisible absolute inset-x-0 top-0 -z-10 h-0 overflow-hidden pointer-events-none"
-        >
-          {letters.map((l) => (
-            <div
-              key={l.id}
-              ref={(el) => {
-                if (el) measureRefs.current.set(l.id, el);
-                else measureRefs.current.delete(l.id);
-              }}
-              className="rounded-2xl bg-white p-5 text-left sm:p-7"
-            >
-              <LetterCardBody letter={l} />
-            </div>
-          ))}
-        </div>
-
         {cards.map((card) => {
           const s = card.exiting ? -1 : slot++;
           return (
             <div
               key={card.uid}
+              ref={s === 0 ? topCardRef : undefined}
               aria-hidden={s !== 0}
               style={{
                 ...styleFor(card, s),
                 transformOrigin: "center bottom",
                 willChange: "transform, opacity",
               }}
-              className="absolute inset-x-0 top-0 h-full rounded-2xl bg-white p-5 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5 sm:p-7"
+              className="absolute inset-x-0 top-0 rounded-2xl bg-white p-5 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5 sm:p-7"
             >
               <LetterCardBody letter={card.letter} />
             </div>
