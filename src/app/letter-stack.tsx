@@ -35,37 +35,39 @@ interface LetterStackProps {
 function LetterCardBody({ letter }: { letter: Letter }) {
   return (
     <>
-      <div className="mb-4 flex items-center justify-between border-b border-coral-900/8 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-coral-50 text-sm font-medium text-coral-600">
+      <div className="mb-3 flex items-center justify-between border-b border-coral-900/8 pb-3 sm:mb-4 sm:pb-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-coral-50 text-xs font-medium text-coral-600 sm:h-9 sm:w-9 sm:text-sm">
             {letter.sender.charAt(0)}
           </div>
           <div>
-            <p className="text-sm font-medium text-coral-900">
+            <p className="text-[13px] font-medium text-coral-900 sm:text-sm">
               {letter.sender} gửi {letter.childName}
             </p>
-            <p className="text-xs text-coral-800/50">{letter.childMeta}</p>
+            <p className="text-[11px] text-coral-800/50 sm:text-xs">
+              {letter.childMeta}
+            </p>
           </div>
         </div>
-        <div className="flex flex-col items-center rounded-lg bg-coral-50 px-3 py-1.5 text-coral-600">
-          <span className="text-[10px] font-medium uppercase tracking-wide">
+        <div className="flex flex-col items-center rounded-lg bg-coral-50 px-2.5 py-1 text-coral-600 sm:px-3 sm:py-1.5">
+          <span className="text-[9px] font-medium uppercase tracking-wide sm:text-[10px]">
             {letter.dayLabel}
           </span>
-          <span className="text-base font-semibold leading-none">
+          <span className="text-sm font-semibold leading-none sm:text-base">
             {letter.time}
           </span>
         </div>
       </div>
 
-      <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-coral-400">
+      <p className="mb-2 text-[10px] font-medium uppercase tracking-wide text-coral-400 sm:mb-3 sm:text-[11px]">
         {categoryLabel[letter.category]}
       </p>
 
-      <p className="font-serif text-[15px] leading-loose text-coral-900/90">
+      <p className="font-serif text-[13px] leading-relaxed text-coral-900/90 sm:text-[15px] sm:leading-loose">
         {letter.body}
       </p>
 
-      <p className="mt-5 font-script text-2xl leading-none text-coral-600">
+      <p className="mt-3 font-script text-xl leading-none text-coral-600 sm:mt-5 sm:text-2xl">
         — {letter.sender}
       </p>
     </>
@@ -288,7 +290,7 @@ export function LetterStack({
 
   let slot = 0;
   return (
-    <div className="mt-12 w-full max-w-sm">
+    <div className="w-full max-w-sm sm:mt-12">
       <div
         role="button"
         tabIndex={0}
@@ -315,7 +317,7 @@ export function LetterStack({
                 if (el) measureRefs.current.set(l.id, el);
                 else measureRefs.current.delete(l.id);
               }}
-              className="rounded-2xl bg-white p-7 text-left"
+              className="rounded-2xl bg-white p-5 text-left sm:p-7"
             >
               <LetterCardBody letter={l} />
             </div>
@@ -333,7 +335,7 @@ export function LetterStack({
                 transformOrigin: "center bottom",
                 willChange: "transform, opacity",
               }}
-              className="absolute inset-x-0 top-0 h-full rounded-2xl bg-white p-7 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5"
+              className="absolute inset-x-0 top-0 h-full rounded-2xl bg-white p-5 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5 sm:p-7"
             >
               <LetterCardBody letter={card.letter} />
             </div>
@@ -342,7 +344,7 @@ export function LetterStack({
       </div>
 
       {/* Gợi ý thao tác (+ chỉ báo lá đang xem, ẩn mặc định — xem prop showIndicator) */}
-      <div className="mt-6 flex flex-col items-center gap-3">
+      <div className="mt-3 flex flex-col items-center gap-2 sm:mt-6 sm:gap-3">
         {showIndicator && (
           <div className="flex items-center gap-1.5">
             {letters.map((l, i) => (
