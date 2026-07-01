@@ -11,6 +11,7 @@ interface Card {
   tilt: number; // góc nghiêng ngẫu nhiên, gắn khi lá vào chồng, giữ tới khi bị lật đi
   enter?: boolean; // true ngay khi mới được nạp → để chạy hiệu ứng xuất hiện
   exiting?: Dir; // hướng đang bay ra
+  justPromoted?: boolean; // true đúng 1 frame khi lá bị đẩy lên slot thấp hơn do lá trên cùng bị lật đi → tắt transition để không "trượt lên", lá chỉ lộ ra đúng vị trí nó đã đứng sẵn
 }
 
 // Làm tròn 3 chữ số thập phân cho MỌI số đưa vào transform. Float dài kiểu
@@ -136,11 +137,20 @@ export function LetterStack({
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   }, []);
 
-  // Bỏ cờ `enter` ở frame kế tiếp → lá mới chuyển từ trạng thái "xuất hiện" về vị trí thật
+  // Bỏ cờ `enter`/`justPromoted` ở frame kế tiếp: lá mới chuyển từ trạng thái
+  // "xuất hiện" về vị trí thật (có animate), còn lá vừa bị đẩy slot do lá trên
+  // cùng bị lật đi thì chỉ cần tắt transition đúng 1 frame rồi trả lại bình
+  // thường (không có transition nào chạy vì giá trị không đổi thêm nữa).
   useLayoutEffect(() => {
-    if (!cards.some((c) => c.enter)) return;
+    if (!cards.some((c) => c.enter || c.justPromoted)) return;
     const r = requestAnimationFrame(() =>
-      setCards((cs) => cs.map((c) => (c.enter ? { ...c, enter: false } : c)))
+      setCards((cs) =>
+        cs.map((c) =>
+          c.enter || c.justPromoted
+            ? { ...c, enter: false, justPromoted: false }
+            : c
+        )
+      )
     );
     return () => cancelAnimationFrame(r);
   }, [cards]);
@@ -176,10 +186,17 @@ export function LetterStack({
     // Tạo lá mới NGAY ĐÂY (một lần) — không gọi makeCard() bên trong updater,
     // vì updater bị React StrictMode gọi 2 lần (dev) sẽ nuốt mất thư trong nguồn.
     const fresh = makeCard();
-    // Đánh dấu lá trên cùng đang bay ra + nạp ngay lá mới ở đáy chồng
+    // Đánh dấu lá trên cùng đang bay ra + nạp ngay lá mới ở đáy chồng. Các lá
+    // còn lại (đã đứng sẵn trong chồng) được đánh dấu justPromoted để tắt
+    // transition — chúng không "trượt lên" mà chỉ lộ ra đúng vị trí đã có sẵn
+    // khi lá trên cùng bay đi.
     setCards((cs) => {
       const [top, ...rest] = cs;
-      return [{ ...top, exiting: dir }, ...rest, fresh];
+      return [
+        { ...top, exiting: dir },
+        ...rest.map((c) => ({ ...c, justPromoted: true })),
+        fresh,
+      ];
     });
     setTimeout(
       () => {
@@ -270,7 +287,7 @@ export function LetterStack({
         zIndex: z,
         opacity: 1,
         transform: `translateX(${hintX}px) rotate(${card.tilt}deg)`,
-        transition: moveTransition,
+        transition: card.justPromoted ? "none" : moveTransition,
       };
     }
     // Các lá phía sau: lùi xuống + thu nhỏ để ló ra như một chồng thư
@@ -280,7 +297,7 @@ export function LetterStack({
       zIndex: z,
       opacity: card.enter ? 0 : 1,
       transform: `translateY(${ty}px) scale(${sc}) rotate(${card.tilt}deg)`,
-      transition: moveTransition,
+      transition: card.justPromoted ? "none" : moveTransition,
     };
   }
 
