@@ -10,6 +10,17 @@ ConOi là app gửi "lá thư" hàng ngày từ cha mẹ đến con cái, nội 
 
 Đọc chi tiết tại `brainstorming/product-vision.md`.
 
+## Quy trình: luôn biết việc tiếp theo là gì
+
+Khi được giao việc mà không rõ nên làm gì trước/tiếp theo, đọc theo thứ tự:
+
+1. **`brainstorming/master-plan.md`** — nguồn DUY NHẤT cho "đã làm gì / đang ở đâu / tiếp theo làm gì" + bức tranh tổng thể (bảng phase), cập nhật liên tục. Luôn đọc file này trước khi bắt đầu việc mới nếu user không chỉ định rõ task.
+2. **`brainstorming/mvp-scope.md`** — tra khi cần biết thứ tự phase lớn / cái gì trong-ngoài phạm vi MVP (ít đổi hơn master-plan).
+3. **`brainstorming/tech-decisions.md`** — tra khi cần biết "tại sao chọn công nghệ X" hoặc còn câu hỏi kỹ thuật nào chưa chốt.
+4. Các file brainstorming còn lại — chỉ là ý tưởng/research, xem mục "File brainstorming khác" bên dưới để biết file nào đã là quyết định (📌) và file nào chưa chốt (💭). KHÔNG tự ý coi ý tưởng trong file 💭 là đã được duyệt đưa vào scope trừ khi `mvp-scope.md` hoặc `tech-decisions.md` xác nhận lại.
+
+Sau khi hoàn thành một việc, tick checkbox và cập nhật trạng thái phase trong `brainstorming/master-plan.md` (thêm việc mới vào đúng mục nếu phát sinh) trước khi kết thúc phiên — để lần sau việc "tiếp theo" và bức tranh tổng thể luôn đúng mà không cần hỏi lại user.
+
 ## Tech stack đã chốt
 
 - Frontend + Backend: Next.js, deploy trên Vercel
@@ -41,13 +52,16 @@ Thư mục `scripts/legacy-google-apps-script/` chứa bản proof-of-concept ba
 
 ## File brainstorming khác
 
-- `brainstorming/product-vision.md` — bối cảnh, mission, đối tượng người dùng
-- `brainstorming/mvp-scope.md` — phạm vi MVP chi tiết
-- `brainstorming/branding.md` — tên thương hiệu, domain, các tên đã cân nhắc và loại bỏ
-- `brainstorming/content-tone-guide.md` — quy tắc giọng văn cho từng category nội dung
-- `brainstorming/tech-decisions.md` — các quyết định kỹ thuật và lý do
-- `brainstorming/competitor-research.md` — nghiên cứu đối thủ cạnh tranh, landing page UX patterns, phác thảo cấu trúc landing page
-- `brainstorming/design-system.md` — **guideline thiết kế UI** (màu, font, component pattern, animation, bẫy kỹ thuật); đọc trước khi làm UI mới
-- `brainstorming/landing-content-variants.md` — quyết định phạm vi cho tính năng luân chuyển nội dung (variant) trên landing page, bắt đầu từ headline
-- `brainstorming/content-taxonomy-and-personalization.md` — brainstorm tầm nhìn hệ thống: category/topic do admin sở hữu và mở rộng được, chiến lược sinh nội dung theo category, cá nhân hoá mix category theo từng con (chưa phải quyết định phạm vi MVP)
-- `brainstorming/manual-writing-and-voice.md` — brainstorm: phụ huynh viết thư thủ công, tự động phân loại bằng AI, học giọng văn riêng cho từng gia đình (chưa phải quyết định phạm vi MVP)
+> 📌 = đã chốt/quyết định, coi là ràng buộc khi code. 💭 = brainstorm/tầm nhìn, chưa chốt phạm vi — tham khảo, không tự ý code theo cho tới khi được xác nhận trong `mvp-scope.md`/`tech-decisions.md`.
+
+- 📌 `brainstorming/product-vision.md` — bối cảnh, mission, đối tượng người dùng
+- 📌 `brainstorming/mvp-scope.md` — phạm vi MVP chi tiết
+- 📌 `brainstorming/branding.md` — tên thương hiệu, domain, các tên đã cân nhắc và loại bỏ
+- 📌 `brainstorming/content-tone-guide.md` — quy tắc giọng văn cho từng category nội dung
+- 📌 `brainstorming/tech-decisions.md` — các quyết định kỹ thuật và lý do (một số dòng trong file này vẫn đánh dấu "chưa chốt" — đọc kỹ mục tương ứng)
+- 💭 `brainstorming/competitor-research.md` — nghiên cứu đối thủ cạnh tranh, landing page UX patterns, phác thảo cấu trúc landing page (tham khảo, không phải quyết định)
+- 📌 `brainstorming/design-system.md` — **guideline thiết kế UI** (màu, font, component pattern, animation, bẫy kỹ thuật); đọc trước khi làm UI mới
+- 📌 `brainstorming/landing-content-variants.md` — quyết định phạm vi cho tính năng luân chuyển nội dung (variant) trên landing page, bắt đầu từ headline
+- 💭 `brainstorming/content-taxonomy-and-personalization.md` — brainstorm tầm nhìn hệ thống: category/topic do admin sở hữu và mở rộng được, chiến lược sinh nội dung theo category, cá nhân hoá mix category theo từng con (chưa phải quyết định phạm vi MVP)
+- 💭 `brainstorming/manual-writing-and-voice.md` — brainstorm: phụ huynh viết thư thủ công, tự động phân loại bằng AI, học giọng văn riêng cho từng gia đình (chưa phải quyết định phạm vi MVP)
+- 🔄 `brainstorming/master-plan.md` — **bức tranh tổng thể + tiến độ**: bảng phase (đã xong/đang làm/chưa bắt đầu) + backlog chi tiết, cập nhật liên tục (không phải file quyết định phạm vi, nhưng là nguồn duy nhất cho "đã làm gì / tiếp theo làm gì")
