@@ -48,3 +48,6 @@ Thư mục `scripts/legacy-google-apps-script/` chứa bản proof-of-concept ba
 - `brainstorming/tech-decisions.md` — các quyết định kỹ thuật và lý do
 - `brainstorming/competitor-research.md` — nghiên cứu đối thủ cạnh tranh, landing page UX patterns, phác thảo cấu trúc landing page
 - `brainstorming/design-system.md` — **guideline thiết kế UI** (màu, font, component pattern, animation, bẫy kỹ thuật); đọc trước khi làm UI mới
+- `brainstorming/landing-content-variants.md` — quyết định phạm vi cho tính năng luân chuyển nội dung (variant) trên landing page, bắt đầu từ headline
+- `brainstorming/content-taxonomy-and-personalization.md` — brainstorm tầm nhìn hệ thống: category/topic do admin sở hữu và mở rộng được, chiến lược sinh nội dung theo category, cá nhân hoá mix category theo từng con (chưa phải quyết định phạm vi MVP)
+- `brainstorming/manual-writing-and-voice.md` — brainstorm: phụ huynh viết thư thủ công, tự động phân loại bằng AI, học giọng văn riêng cho từng gia đình (chưa phải quyết định phạm vi MVP)
