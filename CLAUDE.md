@@ -4,7 +4,9 @@
 
 ## Sản phẩm là gì
 
-ConOi là app gửi email hàng ngày từ cha mẹ đến con cái, nội dung được cá nhân hoá theo tên, độ tuổi, sở thích của con. Bắt đầu từ nhu cầu cá nhân (gửi cho con gái Suti, 9 tuổi, lớp 3, thích vẽ manga và đọc Doraemon/Miko), mục tiêu dài hạn là thương mại hoá cho nhiều phụ huynh khác.
+ConOi là app gửi "lá thư" hàng ngày từ cha mẹ đến con cái, nội dung được cá nhân hoá theo tên, độ tuổi, sở thích của con. Bắt đầu từ nhu cầu cá nhân (gửi cho con gái Suti, 9 tuổi, lớp 3, thích vẽ manga và đọc Doraemon/Miko), mục tiêu dài hạn là thương mại hoá cho nhiều phụ huynh khác.
+
+**Quan trọng — kênh gửi:** Email KHÔNG phải kênh chính. Trẻ em (đối tượng nhận nội dung) thường không dùng điện thoại/hạn chế dùng internet. Kênh chính là **bản in (printable) khổ A4, in màu, gửi về địa chỉ nhà qua đường bưu điện**. Email chỉ là 1 kênh deliver phụ (ví dụ để phụ huynh xem trước/lưu trữ). Quy trình in ấn + gửi bưu điện cụ thể (nhà in, tần suất, chi phí...) chưa chốt, sẽ quyết định sau.
 
 Đọc chi tiết tại `brainstorming/product-vision.md`.
 
@@ -13,7 +15,8 @@ ConOi là app gửi email hàng ngày từ cha mẹ đến con cái, nội dung 
 - Frontend + Backend: Next.js, deploy trên Vercel
 - Database: Neon (Postgres serverless) — KHÔNG dùng Supabase
 - AI content generation: OpenAI API (gpt-4o-mini)
-- Email sending: chưa chốt — cân nhắc Resend hoặc Gmail API (xem `brainstorming/tech-decisions.md`)
+- Email sending: chưa chốt — cân nhắc Resend hoặc Gmail API (xem `brainstorming/tech-decisions.md`); lưu ý đây là kênh phụ, không phải kênh chính
+- Kênh in ấn/gửi bưu điện (kênh chính): chưa chốt bất kỳ quyết định kỹ thuật nào (nhà cung cấp in/gửi, format PDF, thu thập địa chỉ nhà...)
 
 ## Thứ tự triển khai MVP
 
