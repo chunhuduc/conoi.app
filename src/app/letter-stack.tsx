@@ -30,8 +30,7 @@ interface LetterStackProps {
   showIndicator?: boolean;
 }
 
-// Nội dung bên trong lá thư — dùng chung cho cả lá hiển thị lẫn lá "đo ẩn"
-// (xem useLayoutEffect bên dưới) để chiều cao đo được khớp 100% với thực tế.
+// Nội dung bên trong lá thư
 function LetterCardBody({ letter }: { letter: Letter }) {
   return (
     <>
@@ -112,21 +111,21 @@ export function LetterStack({
   const [hintX, setHintX] = useState(0); // dao động nhẹ khi idle để gợi ý vuốt
   const [interacted, setInteracted] = useState(false);
 
-  // Chiều cao khung CỐ ĐỊNH, đo MỘT LẦN trên toàn bộ nguồn thư (không phải
-  // riêng lá đang hiện) → đổi lá không bao giờ làm khung đổi kích thước/khiến
-  // trang xê dịch nữa. Mỗi lá thư hiển thị sẽ giãn đầy khung này (h-full),
-  // giống như các tờ giấy thư cùng khổ — lá ngắn hơn chỉ để trống phần dưới.
-  const measureRefs = useRef(new Map<string, HTMLDivElement>());
+  // Chiều cao khung CỐ ĐỊNH, đo MỘT LẦN duy nhất lúc mount (từ lá đầu tiên
+  // nằm trên cùng) rồi giữ nguyên suốt vòng đời component — không đo lại khi
+  // lá trên cùng đổi, nên khung chồng thư (và vị trí của nó khi container cha
+  // căn giữa màn hình) không bao giờ dịch chuyển nữa. Mỗi lá thư spawn sau này
+  // tự co giãn theo đúng nội dung của nó (không ép về khung chung); lá dài bất
+  // thường có thể tràn ra ngoài khung/viewport — chấp nhận được, miễn là không
+  // gây xê dịch cho các lá khác.
+  const topCardRef = useRef<HTMLDivElement | null>(null);
   const [stackHeight, setStackHeight] = useState<number>();
 
   useLayoutEffect(() => {
-    let max = 0;
-    letters.forEach((l) => {
-      const el = measureRefs.current.get(l.id);
-      if (el) max = Math.max(max, el.offsetHeight);
-    });
-    if (max > 0) setStackHeight(max);
-  }, [letters]);
+    const el = topCardRef.current;
+    if (el) setStackHeight(el.offsetHeight);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const phase = useRef<"idle" | "leaving">("idle");
   const drag = useRef({ startX: 0, x: 0, active: false, moved: false });
@@ -302,40 +301,19 @@ export function LetterStack({
         style={{ height: stackHeight }}
         className="relative w-full cursor-pointer touch-pan-y select-none outline-none [perspective:1400px] focus-visible:rounded-2xl focus-visible:ring-2 focus-visible:ring-coral-400"
       >
-        {/* Khối đo ẩn: render TẤT CẢ lá trong nguồn (không chỉ 3 lá đang hiện)
-            cùng style hệt lá thật, để lấy chiều cao lớn nhất một lần duy nhất.
-            visibility:hidden giữ nguyên kích thước layout nhưng không hiện ra
-            và không nhận tương tác. */}
-        <div
-          aria-hidden="true"
-          className="invisible absolute inset-x-0 top-0 -z-10 h-0 overflow-hidden pointer-events-none"
-        >
-          {letters.map((l) => (
-            <div
-              key={l.id}
-              ref={(el) => {
-                if (el) measureRefs.current.set(l.id, el);
-                else measureRefs.current.delete(l.id);
-              }}
-              className="rounded-2xl bg-white p-5 text-left sm:p-7"
-            >
-              <LetterCardBody letter={l} />
-            </div>
-          ))}
-        </div>
-
         {cards.map((card) => {
           const s = card.exiting ? -1 : slot++;
           return (
             <div
               key={card.uid}
+              ref={s === 0 ? topCardRef : undefined}
               aria-hidden={s !== 0}
               style={{
                 ...styleFor(card, s),
                 transformOrigin: "center bottom",
                 willChange: "transform, opacity",
               }}
-              className="absolute inset-x-0 top-0 h-full rounded-2xl bg-white p-5 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5 sm:p-7"
+              className="absolute inset-x-0 top-0 rounded-2xl bg-white p-5 text-left shadow-[0_20px_50px_-20px_rgba(120,50,20,0.4)] ring-1 ring-coral-900/5 sm:p-7"
             >
               <LetterCardBody letter={card.letter} />
             </div>
