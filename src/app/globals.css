@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #fdf6f1;
   --foreground: #2c2c2a;
 }
 
@@ -20,6 +20,10 @@
   --color-coral-600: #993c1d;
   --color-coral-800: #712b13;
   --color-coral-900: #4a1b0c;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 body {
