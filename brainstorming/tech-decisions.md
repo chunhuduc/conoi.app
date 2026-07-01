@@ -17,6 +17,15 @@
 | Dịch vụ gửi email | Resend vs Gmail API | Resend phổ biến với Next.js, free tier ~100 email/ngày, dễ tích hợp. Gmail API đã từng dùng ở bản test thủ công nhưng không phù hợp cho gửi tự động quy mô lớn (giới hạn quota, không thiết kế cho transactional email) |
 | Authentication | Tự build vs NextAuth/Auth.js vs Clerk | Cần cân nhắc giữa độ phức tạp setup và chi phí (Clerk có free tier nhưng giới hạn user) |
 
+## Ý tưởng kiến trúc đã nêu trong brainstorm, chưa chốt
+
+Đã thảo luận sơ bộ khi bàn tech stack/kiến trúc, nhưng buổi brainstorm chuyển hướng sang bàn feature trước khi chốt — ghi lại để không mất ý, chưa phải quyết định:
+
+- **Auth + email gộp lại thành 1 quyết định**: dùng Auth.js (NextAuth v5) với Resend làm email provider cho magic-link — giải quyết cả 2 dòng "chưa chốt" ở trên cùng lúc, ít vendor hơn Gmail API. Chưa chốt, cần xác nhận UX magic-link có phù hợp với đối tượng phụ huynh Việt Nam không.
+- **DB access layer**: đề xuất Drizzle ORM thay vì Prisma — nhẹ hơn, hợp với Neon serverless driver, phù hợp schema đơn giản hiện tại. Chưa chốt.
+- **Cron flow sơ bộ** (chỉ để tham khảo, chưa chốt): Vercel Cron gọi `/api/cron/send-daily`, lặp qua từng trẻ — chọn topic theo `current_topic_index` → chọn resource chưa dùng từ `sent_resources` → gọi OpenAI theo prompt đã có → build email bằng `@react-email/components` theo `design-system.md` (khác màu category cứng của legacy script) → gửi qua Resend → ghi `sent_resources` + tăng `current_topic_index`.
+- Các ý tưởng lớn hơn về category/taxonomy (do admin sở hữu, mở rộng được, chiến lược sinh nội dung riêng theo category) và viết thư thủ công + học giọng văn được bàn riêng, xem `content-taxonomy-and-personalization.md` và `manual-writing-and-voice.md` — sẽ ảnh hưởng tới schema ở mục dưới khi chốt.
+
 ## Đã loại bỏ và lý do
 
 | Lựa chọn | Lý do loại bỏ |

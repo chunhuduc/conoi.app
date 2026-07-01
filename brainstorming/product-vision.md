@@ -33,7 +33,7 @@ Các câu hỏi vận hành còn bỏ ngỏ, sẽ quyết định sau khi cần:
 ## Giá trị cốt lõi của sản phẩm
 
 1. **Cá nhân hoá thật sự** — nội dung biết tên con, biết sở thích, biết độ tuổi, không phải newsletter chung chung
-2. **Giọng văn con người** — đọc như cha/mẹ thật viết, không như bot
+2. **Giọng văn con người** — đọc như cha/mẹ thật viết, không như bot (xem ý tưởng học giọng văn riêng theo từng phụ huynh từ thư viết tay: `brainstorming/manual-writing-and-voice.md`)
 3. **Cân bằng giải trí và phát triển** — không chỉ là nội dung vui (vẽ, truyện) mà còn có kỹ năng sống và học tập, nhưng không bị giáo điều
 4. **Không trùng lặp** — hệ thống đảm bảo tài nguyên/link tham khảo không gửi lại 2 lần cho cùng một đứa trẻ
 
