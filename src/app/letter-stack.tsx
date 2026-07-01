@@ -31,8 +31,9 @@ interface LetterStackProps {
   showIndicator?: boolean;
 }
 
-// Nội dung bên trong lá thư
-function LetterCardBody({ letter }: { letter: Letter }) {
+// Nội dung bên trong lá thư — export để tái dùng ở nơi cần hiển thị 1 lá thư
+// tĩnh (không cần vuốt/lật), ví dụ bước preview trong onboarding.
+export function LetterCardBody({ letter }: { letter: Letter }) {
   return (
     <>
       <div className="mb-3 flex items-center justify-between border-b border-coral-900/8 pb-3 sm:mb-4 sm:pb-4">

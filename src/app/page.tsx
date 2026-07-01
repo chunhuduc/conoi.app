@@ -33,7 +33,7 @@ export default function Home() {
 
         {/* CTA */}
         <a
-          href="#bat-dau"
+          href="/bat-dau"
           className="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-coral-900 px-5 text-[13px] font-medium text-cream-50 shadow-[0_10px_25px_-10px_rgba(74,27,12,0.7)] transition-all hover:-translate-y-0.5 hover:bg-coral-800 sm:mt-10 sm:h-12 sm:px-7 sm:text-sm"
         >
           Bắt đầu gửi cho con

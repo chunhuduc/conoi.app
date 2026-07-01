@@ -6,13 +6,14 @@
 
 ConOi là lá thư hằng ngày từ cha mẹ gửi con. Giao diện phải cho cảm giác **ấm áp, thật, như thư tay**, KHÔNG giống dashboard SaaS hay newsletter công nghiệp.
 
-Năm nguyên tắc cốt lõi:
+Sáu nguyên tắc cốt lõi:
 
-1. **Ấm & con người** — palette màu đất/san hô ấm, nền có chiều sâu nhẹ (gradient), bo góc mềm. Không xám lạnh, không xanh tech, không gradient sặc sỡ.
-2. **Tối giản, để cảm xúc dẫn dắt** — mỗi màn hình một thông điệp/hành động chính. Cắt chữ thừa. Không liệt kê tính năng dày đặc. Khoảng trắng rộng rãi.
-3. **Lá thư là nhân vật chính** — nội dung thư (giọng cha mẹ) là trung tâm thị giác, mọi thứ khác là bệ đỡ.
-4. **Chạm được, có "vật lý"** — nghiêng nhẹ, xếp chồng, bóng đổ ấm, animation gợi ý tương tác. Giao diện như giấy đặt trên bàn.
-5. **Tiếng Việt, sentence case, xưng hô cha mẹ – con** — không Title Case, không ALL CAPS (trừ nhãn nhỏ uppercase có chủ đích), không giọng "dạy đời".
+1. **Mobile-first, tối ưu cho iPhone 15 Pro trước tiên** — luôn thiết kế/code cho viewport **393×852** (iPhone 15 Pro, CSS px) trước, rồi mới mở rộng lên `sm:`/desktop. Không thiết kế desktop-first rồi co lại. Phụ huynh dùng ConOi chủ yếu trên điện thoại; mọi màn hình mới phải test ở kích thước này trước khi coi là xong (xem "Quy trình kiểm tra viewport" ở mục 9).
+2. **Ấm & con người** — palette màu đất/san hô ấm, nền có chiều sâu nhẹ (gradient), bo góc mềm. Không xám lạnh, không xanh tech, không gradient sặc sỡ.
+3. **Tối giản, để cảm xúc dẫn dắt** — mỗi màn hình một thông điệp/hành động chính. Cắt chữ thừa. Không liệt kê tính năng dày đặc. Khoảng trắng rộng rãi.
+4. **Lá thư là nhân vật chính** — nội dung thư (giọng cha mẹ) là trung tâm thị giác, mọi thứ khác là bệ đỡ.
+5. **Chạm được, có "vật lý"** — nghiêng nhẹ, xếp chồng, bóng đổ ấm, animation gợi ý tương tác. Giao diện như giấy đặt trên bàn.
+6. **Tiếng Việt, sentence case, xưng hô cha mẹ – con** — không Title Case, không ALL CAPS (trừ nhãn nhỏ uppercase có chủ đích), không giọng "dạy đời".
 
 ## 2. Màu sắc (đã khai báo trong `globals.css` qua `@theme inline`)
 
@@ -82,8 +83,24 @@ Cấu trúc cố định, tái dùng ở mọi nơi hiển thị thư:
 
 Người gửi (Ba/Mẹ/…) và tên con luôn là **biến số**, không hardcode.
 
+### Input text (form)
+`rounded-2xl border border-coral-900/10 bg-white px-4 py-3 font-sans text-[15px] text-coral-900 placeholder:text-coral-800/35 focus:outline-none focus:ring-2 focus:ring-coral-400`, label phía trên `text-xs font-medium text-coral-800/70`. Dùng lần đầu ở onboarding (`src/app/bat-dau/onboarding-wizard.tsx`).
+
+### Chip lựa chọn (chọn tuổi, sở thích, quan hệ...)
+`rounded-full px-4 py-2 text-[13px] font-medium`. Active: `bg-coral-900 text-cream-50`. Không active: `bg-white text-coral-800/70 ring-1 ring-coral-900/10 hover:bg-coral-50`. Luôn có `aria-pressed` + `focus-visible:ring-2 focus-visible:ring-coral-400`.
+
+### Nút phụ / quay lại (text button)
+Không phải CTA thứ hai — chỉ là link chữ nhỏ: `text-xs text-coral-800/55 hover:text-coral-800/80`, không nền/viền. Dùng khi cần "quay lại bước trước" trong flow nhiều bước, giữ đúng nguyên tắc "mỗi màn hình một CTA chính".
+
 ### Chỉ báo nhiều mục (dots) — tuỳ chọn, KHÔNG dùng mặc định trên landing
-Dãy chấm `h-1.5 rounded-full`: active `w-5 bg-coral-600`, thường `w-1.5 bg-coral-200`, `transition-all duration-300`. Landing page hiện chỉ giữ dòng hint chữ ("Vuốt hoặc chạm để đọc thư khác"), không hiện dots — bố cục gọn hơn. Pattern dots vẫn còn trong `LetterStack` qua prop `showIndicator` (mặc định `false`), dùng khi có màn hình cần biết rõ "đang ở thư thứ mấy / tổng bao nhiêu" (ví dụ trang xem lại toàn bộ thư).
+Dãy chấm `h-1.5 rounded-full`: active `w-5 bg-coral-600`, thường `w-1.5 bg-coral-200`, `transition-all duration-300`. Landing page hiện chỉ giữ dòng hint chữ ("Vuốt hoặc chạm để đọc thư khác"), không hiện dots — bố cục gọn hơn. Pattern dots vẫn còn trong `LetterStack` qua prop `showIndicator` (mặc định `false`), dùng khi có màn hình cần biết rõ "đang ở thư thứ mấy / tổng bao nhiêu" (ví dụ trang xem lại toàn bộ thư). Cũng dùng làm step indicator cho flow nhiều bước (xem onboarding: `StepDots` trong `src/app/bat-dau/onboarding-wizard.tsx`) — active `w-5 bg-coral-600`, còn lại `w-1.5 bg-coral-200`, không cần bấm được (chỉ hiển thị tiến độ).
+
+## 5b. Quy trình kiểm tra viewport (mobile-first — BẮT BUỘC)
+
+- Viewport tham chiếu chính: **iPhone 15 Pro — 393×852 CSS px** (`mcp__Claude_Preview__preview_resize` với `width: 393, height: 852`; preset `mobile` mặc định 375×812 dùng tạm được nhưng khi cần chính xác thì set đúng 393×852).
+- Thứ tự code: viết class mặc định (không prefix) cho kích thước này trước, thêm `sm:`/`md:` sau để mở rộng lên tablet/desktop — KHÔNG viết ngược (code desktop rồi thêm breakpoint thu nhỏ).
+- Trước khi coi 1 màn hình/feature UI là xong: chụp/inspect ở 393×852 trước tiên, sau đó mới kiểm tra thêm `sm:`/desktop nếu màn hình đó có layout khác biệt đáng kể ở màn hình lớn.
+- Để ý vùng an toàn iPhone (notch/home indicator): dùng `pb-[max(1.5rem,env(safe-area-inset-bottom))]` như landing page đã làm, không đặt CTA/nội dung quan trọng sát mép dưới.
 
 ## 6. Chuyển động & tương tác
 
