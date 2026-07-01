@@ -308,7 +308,7 @@ export function LetterStack({
             và không nhận tương tác. */}
         <div
           aria-hidden="true"
-          className="invisible absolute inset-x-0 top-0 -z-10 pointer-events-none"
+          className="invisible absolute inset-x-0 top-0 -z-10 h-0 overflow-hidden pointer-events-none"
         >
           {letters.map((l) => (
             <div
